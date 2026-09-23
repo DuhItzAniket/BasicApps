@@ -18,7 +18,6 @@
         Top="{Binding Top, Mode=TwoWay}"
         ShowInTaskbar="False"
         ResizeMode="NoResize"
-        Loaded="OnLoaded"
         Closing="OnClosing"
         LocationChanged="OnLocationChanged"
         MouseLeftButtonDown="Window_MouseLeftButtonDown"

@@ -16,7 +16,7 @@ public partial class MainWindow : Window
     private Point _dragStartPoint;
     private MainViewModel? _mainViewModel;
 
-    public MainWindow()
+public MainWindow()
     {
         InitializeComponent();
         SourceInitialized += OnSourceInitialized;
@@ -25,19 +25,6 @@ public partial class MainWindow : Window
         KeyDown += Window_KeyDown;
         PreviewKeyDown += Window_PreviewKeyDown;
     }
-
-    private void OnSourceInitialized(object sender, EventArgs e)
-    {
-        _mainViewModel = DataContext as MainViewModel;
-        if (_mainViewModel != null)
-        {
-            _mainViewModel.PropertyChanged += OnViewModelPropertyChanged;
-        }
-        _hotkeyService?.Initialize(this);
-        _hotkeyService?.RegisterGlobalHotkey("F12", () => _mainViewModel?.ToggleOverlayCommand.Execute(null));
-    }
-
-    private void OnViewModelPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
         if (e.PropertyName == nameof(MainViewModel.IsVisible))
         {
