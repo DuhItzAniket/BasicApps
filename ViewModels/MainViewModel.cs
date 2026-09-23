@@ -44,6 +44,21 @@ public sealed class MainViewModel : ViewModelBase
         set => SetProperty(ref _topMost, value);
     }
 
+    public double Left
+    {
+        get => _left;
+        set => SetProperty(ref _left, value);
+    }
+
+    public double Top
+    {
+        get => _top;
+        set => SetProperty(ref _top, value);
+    }
+
+    private double _left;
+    private double _top;
+
     public MainViewModel(
         ConfigService configService,
         AudioService audioService,
