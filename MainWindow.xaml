@@ -1,0 +1,173 @@
+<Window x:Class="BasicApps.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:BasicApps.ViewModels"
+        xmlns:conv="clr-namespace:BasicApps.Converters"
+        mc:Ignorable="d"
+        Title="BasicApps"
+        Height="200" Width="320"
+        MinHeight="120" MinWidth="200"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        Topmost="{Binding TopMost}"
+        Opacity="{Binding Opacity}"
+        Left="{Binding Left, Mode=TwoWay}"
+        Top="{Binding Top, Mode=TwoWay}"
+        ShowInTaskbar="False"
+        ResizeMode="NoResize"
+        Loaded="OnLoaded"
+        Closing="OnClosing"
+        LocationChanged="OnLocationChanged"
+        MouseLeftButtonDown="Window_MouseLeftButtonDown"
+        KeyDown="Window_KeyDown">
+
+    <Window.Resources>
+        <conv:BoolToOpacityConverter x:Key="BoolToOpacityConverter" TrueValue="1.0" FalseValue="0.6"/>
+        <conv:TileTypeToIconConverter x:Key="TileTypeToIconConverter"/>
+        <conv:InverseBoolConverter x:Key="InverseBoolConverter"/>
+
+        <Style x:Key="TileButtonStyle" TargetType="Button">
+            <Setter Property="Width" Value="70"/>
+            <Setter Property="Height" Value="70"/>
+            <Setter Property="Margin" Value="4"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Background" Value="#33FFFFFF"/>
+            <Setter Property="BorderBrush" Value="#44FFFFFF"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="ToolTip" Value="{Binding Hotkey, StringFormat='Hotkey: {0}'}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="8"
+                                SnapsToDevicePixels="True">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                
+                                <Viewbox Grid.Row="0" Margin="12" Stretch="Uniform">
+                                    <ContentControl Content="{TemplateBinding Tag}"/>
+                                </Viewbox>
+                                
+                                <TextBlock Grid.Row="1"
+                                           Text="{Binding Content}"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           Margin="4,0,4,6"
+                                           FontSize="10"
+                                           TextWrapping="Wrap"
+                                           TextAlignment="Center"
+                                           Opacity="0.9"/>
+                            </Grid>
+                            
+                            <Border.Effect>
+                                <DropShadowEffect Color="Black" Opacity="0.3" BlurRadius="4" ShadowDepth="1"/>
+                            </Border.Effect>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="#55FFFFFF"/>
+                                <Setter TargetName="Border" Property="BorderBrush" Value="#88FFFFFF"/>
+                                <Setter TargetName="Border" Property="Effect">
+                                    <Setter.Value>
+                                        <DropShadowEffect Color="#0078D7" Opacity="0.6" BlurRadius="12" ShadowDepth="0"/>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="#77FFFFFF"/>
+                                <Setter TargetName="Border" Property="RenderTransform">
+                                    <Setter.Value>
+                                        <ScaleTransform ScaleX="0.96" ScaleY="0.96"/>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                            <DataTrigger Binding="{Binding IsActive}" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="#440078D7"/>
+                                <Setter TargetName="Border" Property="BorderBrush" Value="#AA0078D7"/>
+                            </DataTrigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <DataTemplate DataType="{x:Type vm:TileViewModel}">
+            <Button Style="{StaticResource TileButtonStyle}"
+                    Content="{Binding Title}"
+                    Tag="{Binding Type, Converter={StaticResource TileTypeToIconConverter}}"
+                    Command="{Binding DataContext.TileClickCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                    CommandParameter="{Binding}"
+                    MouseEnter="Tile_MouseEnter"
+                    MouseLeave="Tile_MouseLeave"/>
+        </DataTemplate>
+    </Window.Resources>
+
+    <Border x:Name="RootBorder" CornerRadius="10" Background="#1A1A2E" BorderBrush="#33FFFFFF" BorderThickness="1">
+        <Border.Effect>
+            <DropShadowEffect Color="Black" Opacity="0.5" BlurRadius="20" ShadowDepth="0"/>
+        </Border.Effect>
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Header / Drag Area -->
+            <Border x:Name="HeaderBorder" Grid.Row="0" Height="28" Background="Transparent" MouseLeftButtonDown="Header_MouseLeftButtonDown">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <TextBlock Grid.Column="0" Text="BasicApps" FontSize="11" FontWeight="SemiBold" Foreground="#CCFFFFFF" 
+                               VerticalAlignment="Center" Margin="10,0,0,0"/>
+                    
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" Margin="0,0,8,0">
+                        <Button x:Name="SettingsBtn" Content="⚙" Width="24" Height="24" FontSize="12"
+                                Background="Transparent" BorderThickness="0" Foreground="#AAFFFFFF"
+                                Command="{Binding SettingsCommand}" ToolTip="Settings"/>
+                        <Button x:Name="MinimizeBtn" Content="—" Width="24" Height="24" FontSize="14"
+                                Background="Transparent" BorderThickness="0" Foreground="#AAFFFFFF"
+                                Click="MinimizeBtn_Click" ToolTip="Hide (Global Hotkey to show)"/>
+                        <Button x:Name="CloseBtn" Content="✕" Width="24" Height="24" FontSize="11"
+                                Background="Transparent" BorderThickness="0" Foreground="#AAFFFFFF"
+                                Command="{Binding CloseCommand}" ToolTip="Exit"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Tiles Grid -->
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" 
+                          Padding="8" Background="Transparent">
+                <ItemsControl ItemsSource="{Binding Tiles}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel Orientation="Horizontal" ItemWidth="82" ItemHeight="90"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                </ItemsControl>
+            </ScrollViewer>
+
+            <!-- Resize Grip -->
+            <ResizeGrip x:Name="ResizeGrip" HorizontalAlignment="Right" VerticalAlignment="Bottom" 
+                        Width="16" Height="16" Visibility="Collapsed" Opacity="0.3"
+                        Foreground="#55FFFFFF" Cursor="SizeNWSE"/>
+        </Grid>
+    </Border>
+</Window>
